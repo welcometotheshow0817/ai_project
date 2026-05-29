@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import platform
 
-# 1. 페이지 설정 및 제목 (이 설정이 브라우저 탭 및 상단에 한글로 표시되게 합니다)
+# 1. 페이지 설정 및 제목
 st.set_page_config(page_title="서울 기온 분석 앱", layout="centered")
 st.title("🌡️ 서울 연도별 특정 날짜 기온 분석")
 st.write("1907년부터 2018년까지의 데이터를 바탕으로 선택한 날짜의 기온 변화 추이를 확인합니다.")
@@ -38,6 +39,7 @@ with st.spinner("데이터를 불러오는 중입니다..."):
 st.sidebar.header("🗓️ 날짜 선택")
 selected_month = st.sidebar.selectbox("월을 선택하세요", list(range(1, 13)), index=7)
 
+# 월별 말일 예외 처리
 if selected_month in [4, 6, 9, 11]:
     max_day = 30
 elif selected_month == 2:
@@ -54,22 +56,29 @@ filtered_df = df[(df['월'] == selected_month) & (df['일'] == selected_day)].so
 if not filtered_df.empty:
     st.subheader(f"📊 {selected_month}월 {selected_day}일의 기온 변화 그래프")
     
-    # 리눅스 서버용 기본 폰트 설정 및 마이너스 깨짐 방지
-    plt.rcParams['font.family'] = 'sans-serif'
+    # OS별 matplotlib 한글 폰트 설정 및 마이너스 깨짐 방지
+    system_os = platform.system()
+    if system_os == "Windows":
+        plt.rcParams['font.family'] = 'Malgun Gothic'
+    elif system_os == "Darwin":  # Mac
+        plt.rcParams['font.family'] = 'AppleGothic'
+    else:  # Linux (Streamlit Cloud 등)
+        plt.rcParams['font.family'] = 'NanumGothic'
+        
     plt.rcParams['axes.unicode_minus'] = False
     
     fig, ax = plt.subplots(figsize=(10, 5))
     
     # 최고기온 (핫핑크)
-    ax.plot(filtered_df['연度' if '연度' in filtered_df.columns else '연도'], filtered_df['최고기온(℃)'], 
+    ax.plot(filtered_df['연도'], filtered_df['최고기온(℃)'], 
             color='#FF69B4', marker='o', markersize=3, linestyle='-', label='최고기온')
     
     # 최저기온 (연한 파란색)
-    ax.plot(filtered_df['연度' if '연度' in filtered_df.columns else '연도'], filtered_df['최저기온(℃)'], 
+    ax.plot(filtered_df['연도'], filtered_df['최저기온(℃)'], 
             color='#ADD8E6', marker='o', markersize=3, linestyle='-', label='최저기온')
     
     # 그래프 스타일 설정
-    ax.set_title("날짜별 기온분석", fontsize=16, fontweight='bold', pad=15)
+    ax.set_title(f"{selected_month}월 {selected_day}일 기온 분석", fontsize=16, fontweight='bold', pad=15)
     ax.set_xlabel("연도", fontsize=12)
     ax.set_ylabel("온도 (℃)", fontsize=12)
     ax.legend(loc="upper right", fontsize=10)
@@ -94,4 +103,4 @@ if not filtered_df.empty:
                   delta=f"{int(min_temp_row['연도'])}년", 
                   delta_color="inverse")
 else:
-    st.warning("선택한
+    st.warning(f"선택한 {selected_month}월 {selected_day}일에 해당하는 데이터가 없습니다.")
