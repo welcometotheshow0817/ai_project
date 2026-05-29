@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 
 # 1. 페이지 설정 및 제목
-st.set_page_config(page_title="서울 기온 분석 앱", layout="centered")
+st.set_page_config(page_title="서울 기온 분석 및 예측 앱", layout="centered")
 st.title("🌡️ 서울 연도별 기온 분석 및 미래 예측")
 st.write("1907년부터 2018년까지의 데이터를 바탕으로 특정 날짜의 기온 추이를 확인하고 미래 기온을 예측합니다.")
 
@@ -50,7 +50,7 @@ else:
 
 selected_day = st.sidebar.selectbox("일을 선택하세요", list(range(1, max_day + 1)), index=14)
 
-# 미래 예측 연도 선택 (기존 데이터 이후인 2019년부터 2100년까지 선택 가능)
+# 미래 예측 연도 선택 (데이터가 2018년까지 있으므로 2019년부터 선택 가능하게 설정)
 predict_year = st.sidebar.slider("예측할 미래 연도를 선택하세요", min_value=2019, max_value=2100, value=2030)
 
 # 4. 데이터 필터링
@@ -61,25 +61,25 @@ if not filtered_df.empty:
     st.subheader(f"📊 {selected_month}월 {selected_day}일의 기온 변화 및 예측 그래프")
     st.caption("💡 그래프 위에 마우스를 올리면 해당 연도의 정확한 기온이 표시됩니다.")
     
-    # --- 머신러닝 기반 미래 기온 예측 로직 (선형 회귀) ---
-    X = filtered_df[['연도']].values 
-    y_max = filtered_df['최고기온(℃)'].values 
-    y_min = filtered_df['최저기온(℃)'].values 
+    # --- 머신러닝 기반 미래 기온 예측 로직 ---
+    X = filtered_df[['연도']].values # 학습용 독립변수 (연도)
+    y_max = filtered_df['최고기온(℃)'].values # 최고기온 타겟
+    y_min = filtered_df['최저기온(℃)'].values # 최저기온 타겟
     
-    # 최고기온 예측 모델 학습
+    # 최고기온 예측 모델 선언 및 학습
     model_max = LinearRegression()
     model_max.fit(X, y_max)
     pred_max_temp = model_max.predict([[predict_year]])[0]
     
-    # 최저기온 예측 모델 학습
+    # 최저기온 예측 모델 선언 및 학습
     model_min = LinearRegression()
     model_min.fit(X, y_min)
     pred_min_temp = model_min.predict([[predict_year]])[0]
     
-    # --- Plotly 대화형 그래프 생성 ---
+    # --- Plotly를 이용한 대화형 그래프 그리기 ---
     fig = go.Figure()
     
-    # 과거 최고기온 선그래프
+    # 1) 과거 최고기온 선그래프
     fig.add_trace(go.Scatter(
         x=filtered_df['연도'], y=filtered_df['최고기온(℃)'],
         mode='lines+markers', name='과거 최고기온',
@@ -88,7 +88,7 @@ if not filtered_df.empty:
         hovertemplate='<b>%{x}년 최고기온</b><br>온도: %{y}°C<extra></extra>'
     ))
     
-    # 과거 최저기온 선그래프
+    # 2) 과거 최저기온 선그래프
     fig.add_trace(go.Scatter(
         x=filtered_df['연도'], y=filtered_df['최저기온(℃)'],
         mode='lines+markers', name='과거 최저기온',
@@ -97,7 +97,7 @@ if not filtered_df.empty:
         hovertemplate='<b>%{x}년 최저기온</b><br>온도: %{y}°C<extra></extra>'
     ))
     
-    # 미래 예측 최고기온 다이아몬드 점
+    # 3) 미래 예측 기온 점 찍기
     fig.add_trace(go.Scatter(
         x=[predict_year], y=[pred_max_temp],
         mode='markers', name='예측 최고기온',
@@ -105,7 +105,6 @@ if not filtered_df.empty:
         hovertemplate=f'<b>{predict_year}년 최고 예측</b><br>온도: %{{y}}:.2f°C<extra></extra>'
     ))
     
-    # 미래 예측 최저기온 다이아몬드 점
     fig.add_trace(go.Scatter(
         x=[predict_year], y=[pred_min_temp],
         mode='markers', name='예측 최저기온',
@@ -113,9 +112,9 @@ if not filtered_df.empty:
         hovertemplate=f'<b>{predict_year}년 최저 예측</b><br>온도: %{{y}}:.2f°C<extra></extra>'
     ))
     
-    # 레이아웃 스타일 가다듬기
+    # 그래프 레이아웃 스타일 설정
     fig.update_layout(
-        title=dict(text=f"{selected_month}월 {selected_day}일 기온 추이 및 예측 ({predict_year}년)", font=dict(size=16)),
+        title=dict(text=f"{selected_month}월 {selected_day}일 기온 추이 및 예측 ({predict_year}년)", font=dict(size=16, family="sans-serif")),
         xaxis_title="연도",
         yaxis_title="온도 (℃)",
         hovermode="closest",
@@ -124,13 +123,15 @@ if not filtered_df.empty:
         plot_bgcolor='rgba(255,255,255,0.9)'
     )
     
+    # 격자선 추가
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='LightGray')
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='LightGray')
     
+    # 스트림릿에 Plotly 차트 표시
     st.plotly_chart(fig, use_container_width=True)
     
     # --- 정보 출력 섹션 ---
-    st.write(f"🔮 **{predict_year}년 {selected_month}월 {selected_day}일** 기온 예측 결과:")
+    st.write(f"🔮 **{predict_year}년 {selected_month}월 {selected_day}일** 기온 예측 결과 (선형회귀):")
     p_col1, p_col2 = st.columns(2)
     with p_col1:
         st.metric(label=f"{predict_year}년 예상 최고 기온", value=f"{pred_max_temp:.2f} ℃")
