@@ -26,7 +26,7 @@ str.subheader("🔍 내 티어 분석하기")
 user_input = str.text_input("자신의 티어를 입력하세요 (예: 골드, 플래티넘)", "").strip()
 
 # 5. 사용자가 입력했을 때 결과 보여주기
-if user_input:
+'''if user_input:
     is_found = False
     for row in valorant_data:
         if row["티어 이름"] in user_input or user_input in row["티어 이름"]:
@@ -38,4 +38,4 @@ if user_input:
             break
             
     if not is_found:
-        str.error("올바른 티어 이름을 입력해주세요! (예: 골드, 실버, 다이아)")
+        str.error("올바른 티어 이름을 입력해주세요! (예: 골드, 실버, 다이아)")'''
