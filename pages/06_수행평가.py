@@ -5,10 +5,23 @@ st.set_page_config(page_title="MBTI 저녁 풀코스 추천기", page_icon="🔮
 
 # 제목 및 설명
 st.title("🔮 MBTI 맞춤형 저녁 풀코스 추천기")
-st.write("당신의 MBTI를 입력하고 오늘 저녁에 딱 맞는 메인 메뉴, 디저트, 음료 코스를 추천받으세요!")
+st.write("당신의 MBTI를 선택하고 오늘 저녁에 딱 맞는 메인 메뉴, 디저트, 음료 코스를 추천받으세요!")
 
-# 유저 입력 (대문자로 자동 변환)
-mbti_input = st.text_input("당신의 MBTI를 입력하세요 (예: INFP, INTJ)", "").upper().strip()
+# 16가지 MBTI 리스트 정의
+mbti_list = [
+    "INTJ", "INTP", "ENTJ", "ENTP",
+    "INFJ", "INFP", "ENFJ", "ENFP",
+    "ISTJ", "ISFJ", "ESTJ", "ESFJ",
+    "ISTP", "ISFP", "ESTP", "ESFP"
+]
+
+# 💡 텍스트 입력 대신 '드롭다운 선택창'으로 변경!
+selected_mbti = st.selectbox(
+    "당신의 MBTI는 무엇인가요?",
+    mbti_list,
+    index=None,  # 처음에 아무것도 선택 안 된 상태로 시작
+    placeholder="여기를 눌러 MBTI를 선택하세요..."
+)
 
 # 데이터베이스
 course_db = {
@@ -42,27 +55,28 @@ course_db = {
     }
 }
 
-# 추천 버튼
+# 추천 버튼 (MBTI를 선택했을 때만 활성화)
 if st.button("오늘의 저녁 메뉴 추천받기 🍽️"):
-    if len(mbti_input) == 4 and all(c in "INFPESTJ" for c in mbti_input):
-        group = mbti_input[1:3]
+    if selected_mbti:
+        # 2번째, 3번째 글자로 그룹 판단 (예: INFP -> NF)
+        group = selected_mbti[1:3]
+        course = course_db[group]
         
-        if group in course_db:
-            course = course_db[group]
+        st.success(f"🎉 {selected_mbti} 성향을 위한 맞춤 코스가 준비되었습니다!")
+        st.write("---")
+        
+        # 결과 출력 UI
+        st.subheader(course["concept"])
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric(label="🍽️ 메인 메뉴", value=course["main"].split()[0], delta=" ".join(course["main"].split()[1:]), delta_color="off")
+        with col2:
+            st.metric(label="🍰 디저트", value=course["dessert"].split()[0], delta=" ".join(course["dessert"].split()[1:]), delta_color="off")
+        with col3:
+            st.metric(label="🍹 음료", value=course["drink"].split()[0], delta=" ".join(course["drink"].split()[1:]), delta_color="off")
             
-            st.success(f"🎉 {mbti_input} 성향을 위한 맞춤 코스가 준비되었습니다!")
-            
-            # 결과 출력 UI
-            st.subheader(course["concept"])
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric(label="🍽️ 메인 메뉴", value=course["main"].split()[0], delta= " ".join(course["main"].split()[1:]), delta_color="off")
-            with col2:
-                st.metric(label="🍰 디저트", value=course["dessert"].split()[0], delta= " ".join(course["dessert"].split()[1:]), delta_color="off")
-            with col3:
-                st.metric(label="🍹 음료", value=course["drink"].split()[0], delta= " ".join(course["drink"].split()[1:]), delta_color="off")
-                
-            st.info(f"💡 **코스 가이드:** {course['desc']}")
+        st.write("---")
+        st.info(f"💡 **코스 가이드:** {course['desc']}")
     else:
-        st.error("⚠️ 올바른 MBTI 4글자를 입력해주세요. (예: ENFP, INTJ)")
+        st.warning("⚠️ 목록에서 MBTI를 먼저 선택해 주세요!")
