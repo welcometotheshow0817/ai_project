@@ -47,33 +47,4 @@ mbti_data = {
 menus = {
     "NT": {"main": "🥩 프라임 립아이 스테이크", "dessert": "🍫 다크 초콜릿 무스", "drink": "☕ 에스프레소", "guide": "최고의 효율과 퀄리티를 중시하는 당신을 위한 선택입니다."},
     "NF": {"main": "🍝 로제 파스타", "dessert": "🍰 딸기 생크림 케이크", "drink": "🫖 얼그레이 밀크티", "guide": "감성과 의미를 소중히 여기는 당신의 마음을 채워줍니다."},
-    "SJ": {"main": "🍲 돼지고기 김치찌개", "dessert": "🍡 쫀득한 찹쌀떡", "drink": "🌾 시원한 식혜", "guide": "안정감과 신뢰를 주는 든든한 한국인의 정석입니다."},
-    "SP": {"main": "🔥 화끈한 마라탕", "dessert": "🍓 딸기 탕후루", "drink": "🍹 과일 에이드", "guide": "오감을 자극하는 모험적인 맛의 조화입니다."}
-}
-
-# 선택창
-mbti_choice = st.selectbox("당신의 MBTI는?", list(mbti_data.keys()), index=None, placeholder="목록에서 선택하세요")
-
-if st.button("오늘의 페르소나 & 메뉴 확인 🔍"):
-    if mbti_choice:
-        char_info = mbti_data[mbti_choice]
-        menu_info = menus[char_info["group"]]
-        
-        st.balloons()
-        st.markdown(f"""
-            <div class="result-box">
-                <div style='color:#94a3b8; font-size:1rem;'>당신의 페르소나 캐릭터</div>
-                <div class="char-name">{char_info['char']}</div>
-                <p style='font-size:1.2rem; font-style:italic;'>"{char_info['trait']}"</p>
-                <hr style='border-color:rgba(255,255,255,0.1)'>
-                <div class="menu-item">🍽️ <b>메인:</b> {menu_info['main']}</div>
-                <div class="menu-item">🍰 <b>디저트:</b> {menu_info['dessert']}</div>
-                <div class="menu-item">🍹 <b>음료:</b> {menu_info['drink']}</div>
-                <div style='margin-top:20px; color:#10b981; font-weight:bold;'>💡 가이드: {menu_info['guide']}</div>
-            </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.warning("MBTI를 먼저 선택해 주세요!")
-
-### 💡 달라진 점
-1. **16가지 모든 유형 대응
+    "SJ": {"main": "🍲 돼지고기 김치찌개", "dessert": "🍡 쫀득한 찹쌀떡", "drink": "🌾 시원한 식혜", "guide": "안
